@@ -1,0 +1,7 @@
+{
+    "name": "dbwriter",
+    "version": "1.0.0",
+    "dependencies": {
+        "@azure/cosmos": "^3.1.1"
+    }
+}
