@@ -1,0 +1,12 @@
+---
+# Source: tmplt/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-externalname
+  labels:
+    app.kubernetes.io/name: tmplt
+    app.kubernetes.io/instance: echo
+spec:
+  type: ExternalName
+  externalName: google.com
