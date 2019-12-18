@@ -1,0 +1,14 @@
+- defaultTab: nodes
+  description: ''
+  executionEnabled: true
+  id: b3ffcc80-7af8-4e72-b86f-6ff2e5c184c1
+  loglevel: INFO
+  name: Get_pods
+  nodeFilterEditable: false
+  scheduleEnabled: true
+  sequence:
+    commands:
+    - script: /tmp/tools/kubectl --token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token) get pods
+    keepgoing: false
+    strategy: node-first
+  uuid: b3ffcc80-7af8-4e72-b86f-6ff2e5c184c1
