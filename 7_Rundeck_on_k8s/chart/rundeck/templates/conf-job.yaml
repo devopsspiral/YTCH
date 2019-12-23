@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "rundeck.fullname" . }}-conf-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: {{ include "rundeck.fullname" . }}-conf-job
+        image: "{{ .Values.rundeckConfJob.image.repository }}:{{ .Values.rundeckConfJob.image.tag }}"
+        imagePullPolicy: {{ .Values.rundeckConfJob.image.pullPolicy }}
+        command: ["/entry.sh", "/tmp/script/setup.sh"]
+        env:
+        - name: RD_URL
+          value: "http://{{ include "rundeck.fullname" . }}:{{ .Values.service.port }}"
+        - name: RD_TOKEN
+          value: {{ .Values.rundeck.adminToken }}
+        volumeMounts:
+        - name: setup-script
+          mountPath: /tmp/script/
+      restartPolicy: Never
+      volumes:
+      - name: setup-script
+        configMap:
+          name: {{ .Release.Name }}-rundeck-setup
+  backoffLimit: 4

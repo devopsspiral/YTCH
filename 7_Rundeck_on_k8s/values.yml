@@ -1,0 +1,24 @@
+ingress:
+  enabled: true
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  paths:
+    - "/"
+  hosts:
+    - rundeck.<cluster dn>
+  tls:
+    - hosts:
+      - rundeck.<cluster dn>
+      secretName: <tls secret>
+
+rundeck:
+  env:
+    RUNDECK_GRAILS_URL: "https://rundeck.<cluster dn>"
+  setup: |
+    rd projects create -p Main
+    cat <<EOF > /tmp/scm_config.json
+    {"config":{"url":"https://github.com/devopsspiral/YTCH.git","fetchAutomatically":"true","pullAutomatically":"true","dir":"/home/rundeck/projects/Main/scm","filePattern":"7_Rundeck_on_k8s/rundeck_jobs/.*\\.yaml","importUuidBehavior":"preserve","useFilePattern":"true","strictHostKeyChecking":"yes","sshPrivateKeyPath":"","format":"yaml","branch":"master","gitPasswordPath":"","pathTemplate":"\${job.group}\${job.name}-\${job.id}.\${config.format}"}}
+    EOF
+    rd projects scm setup -t 'git-import' -i import -f /tmp/scm_config.json -p Main
+    rd projects scm perform -i import -p Main  -a import-all --allitems
