@@ -1,0 +1,95 @@
+- defaultTab: nodes
+  description: ''
+  executionEnabled: true
+  id: 883ca6bd-ab4c-4062-aa03-0d42eb868a88
+  loglevel: INFO
+  name: Create_namespace
+  nodeFilterEditable: false
+  options:
+  - name: Name
+    required: true
+  scheduleEnabled: true
+  sequence:
+    commands:
+    - script: |-
+        alias kubectl='/tmp/tools/kubectl --token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)'
+
+        KUBE_API="https://<api endpont>:<api port>"
+        SERVICE_ACCOUNT_NAME=$RD_OPTION_NAME-admin
+
+        kubectl create ns $RD_OPTION_NAME
+
+        kubectl apply -f - <<EOF
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: Role
+        metadata:
+          namespace: $RD_OPTION_NAME
+          name: $SERVICE_ACCOUNT_NAME
+        rules:
+        - apiGroups: ["*"]
+          resources: ["*"]
+          verbs: ["*"]
+        EOF
+
+        kubectl apply -f - <<EOF
+        apiVersion: v1
+        kind: ServiceAccount
+        metadata:
+          namespace: $RD_OPTION_NAME
+          name: $SERVICE_ACCOUNT_NAME
+        EOF
+
+        kubectl apply -f - <<EOF
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: RoleBinding
+        metadata:
+          name: $RD_OPTION_NAME-binding
+          namespace: $RD_OPTION_NAME
+        subjects:
+        - kind: ServiceAccount
+          name: $SERVICE_ACCOUNT_NAME
+          namespace: $RD_OPTION_NAME
+        roleRef:
+          kind: Role
+          name: $SERVICE_ACCOUNT_NAME
+          apiGroup: rbac.authorization.k8s.io
+        EOF
+
+
+        SECRET_NAME=$(kubectl get serviceaccount ${SERVICE_ACCOUNT_NAME} \
+          --namespace ${RD_OPTION_NAME} \
+          -o jsonpath='{.secrets[0].name}')
+        TOKEN_DATA=$(kubectl get secret ${SECRET_NAME} \
+          --namespace ${RD_OPTION_NAME} \
+          -o jsonpath='{.data.token}')
+        KUBE_CA=$(kubectl get secret ${SECRET_NAME} \
+          --namespace ${RD_OPTION_NAME} \
+          -o "jsonpath={.data['ca\.crt']}")
+
+        TOKEN=$(echo ${TOKEN_DATA} | base64 -d)
+
+        echo "=========================== KUBECONFIG ==========================="
+
+        cat <<EOF
+        apiVersion: v1
+        kind: Config
+        users:
+        - name: $SERVICE_ACCOUNT_NAME
+          user:
+            token: $TOKEN
+        clusters:
+        - cluster:
+            certificate-authority-data: $KUBE_CA
+            server: $KUBE_API
+          name: main-cluster
+        contexts:
+        - context:
+            cluster: main-cluster
+            namespace: $RD_OPTION_NAME
+            user: $SERVICE_ACCOUNT_NAME
+          name: main-context
+        current-context: main-context
+        EOF
+    keepgoing: false
+    strategy: node-first
+  uuid: 883ca6bd-ab4c-4062-aa03-0d42eb868a88
