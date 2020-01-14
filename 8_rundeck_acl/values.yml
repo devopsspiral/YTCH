@@ -14,6 +14,9 @@ ingress:
 
 rundeck:
   adminToken: NITyJT47VPvvfg0aEcYuH40o8x63AJMd
+  realmProperties: |-
+    admin:admin,user,admin,architect,deploy,build
+    nonadmin:nonadmin,nonadmin
   env:
     RUNDECK_GRAILS_URL: "https://rundeck.<cluster dn>"
   setup: |

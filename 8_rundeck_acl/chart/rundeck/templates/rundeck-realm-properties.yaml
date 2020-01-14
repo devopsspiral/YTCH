@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-realm-properties
+type: Opaque
+data: 
+  realm.properties: {{ toYaml .Values.rundeck.realmProperties | indent 2 }}

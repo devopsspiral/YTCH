@@ -1,0 +1,51 @@
+description: nonadmin, run jobs.
+context:
+  project: 'Main'
+for:
+  resource:
+    - equals:
+        kind: event
+      allow: [read]
+  job:
+    - allow: [read,run,kill]
+  node:
+    - allow: '*' # allow read/run for all nodes
+by:
+  group: nonadmin
+
+---
+
+description: nonadmin, work on custom projects.
+context:
+  project: 'Custom-.*'
+for:
+  resource:
+    - allow: '*'
+  job:
+    - allow: '*'
+  adhoc:
+    - allow: '*'
+  node:
+    - allow: '*'
+by:
+  group: nonadmin
+
+---
+
+description: nonadmin, access projects.
+context:
+  application: 'rundeck'
+for:
+  resource:
+    - equals:
+        kind: project
+      allow: '*' # allow create projects
+  project:
+    - match:
+        name: 'Main'
+      allow: [read, delete_execution] # allow view/delete execution for Main project
+    - match:
+        name: 'Custom-.*'
+      allow: '*' # allow all for project
+by:
+  group: nonadmin
