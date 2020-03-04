@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-rundeck-setup
+data:
+  setup.sh: {{ .Values.rundeck.setup | quote }}

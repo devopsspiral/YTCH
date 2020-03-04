@@ -1,0 +1,69 @@
+---
+- name: Setup for Rundeck
+  hosts: all
+  gather_facts: True
+  tasks:
+  - name: Add Rundeck GPG key
+    apt_key:
+      url: https://bintray.com/user/downloadSubjectPublicKey?username=bintray
+      state: present
+
+  - name: Add Rundeck APT repository
+    apt_repository:
+      repo: "deb https://rundeck.bintray.com/rundeck-deb /"
+
+  - name: Apt Install
+    apt:
+      name: ['iptables', 'openjdk-8-jdk-headless', 'uuid-runtime', 'rundeck={{ rundeck_version }}']
+      update_cache: yes
+      state: present
+
+  - name: Configure Port Forwarding for HTTP
+    iptables:
+      table: nat
+      chain: PREROUTING
+      protocol: tcp
+      match: tcp
+      destination: "{{ rundeck_ip }}"
+      destination_port: 80
+      jump: REDIRECT
+      to_ports: 4440
+      comment: Redirect web traffic to port 4440
+
+  - name: Add user rundeck, home dir and shell
+    user:
+      name: rundeck
+      shell: /bin/bash
+
+  - name: Creates var dir
+    file:
+      path: /var/rundeck
+      state: directory
+      owner: rundeck
+      mode: 0700
+
+  - name: Set admin password
+    lineinfile:
+      path: /etc/rundeck/realm.properties
+      regexp: '^admin:'
+      line: 'admin:{{ rundeck_password }},user,admin,architect,deploy,build'
+    notify: Restart rundeck
+
+  - name: Configure css/javascript
+    lineinfile:
+      path: /etc/rundeck/rundeck-config.properties
+      regexp: 'grails.serverURL.'
+      line: 'grails.serverURL=http://{{ rundeck_ip }}:80'
+    notify: Restart rundeck
+
+  - name: Start and enable rundeckd
+    systemd:
+      name: rundeckd
+      enabled: yes
+      state: started
+
+  handlers:
+  - name: Restart rundeck
+    service:
+      name: rundeckd
+      state: restarted

@@ -1,0 +1,4 @@
+---
+rundeck_password: "admin"
+rundeck_version: "3.1.2.20190927-1"
+rundeck_ip: 192.168.56.101

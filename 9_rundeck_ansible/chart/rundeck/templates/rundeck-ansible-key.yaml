@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ include "rundeck.name" . }}
+    helm.sh/chart: {{ include "rundeck.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  name: {{ .Release.Name }}-ansible-key
+type: Opaque
+data:
+# customized cookie-secret to be auto-filled with secure random value
+  key.pem: {{ toYaml .Values.rundeck.ansibleKey | indent 2 }}

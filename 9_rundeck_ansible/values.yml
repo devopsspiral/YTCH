@@ -1,0 +1,31 @@
+image:
+  tag: 3.1.2-ansible
+ingress:
+  enabled: true
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  paths:
+    - "/"
+  hosts:
+    - rundeck.<cluster dn>
+  tls:
+    - hosts:
+      - rundeck.<cluster dn>
+      secretName: <tls secret>
+
+rundeck:
+  adminToken: NITyJT47VPvvfg0aEcYuH40o8x63AJMd
+  realmProperties: |-
+    admin:admin,user,admin,architect,deploy,build
+  env:
+    RUNDECK_GRAILS_URL: "https://rundeck.<cluster dn>"
+  setup: ""
+  ansibleInventory: |-
+    192.168.56.101 ansible_connection=ssh ansible_ssh_user=root ansible_ssh_private_key_file=/home/rundeck/.ansible-key/key.pem
+  ansibleConfig: |-
+    [defaults]
+    host_key_checking = false
+    deprecation_warnings = false
+  ansibleKey: |-
+    <your vm private key>
