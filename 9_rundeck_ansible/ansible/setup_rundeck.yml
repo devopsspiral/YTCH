@@ -30,6 +30,25 @@
       to_ports: 4440
       comment: Redirect web traffic to port 4440
 
+  - name: Persist iptables ipv4
+    debconf:
+      name: iptables-persistent
+      question: iptables-persistent/autosave_v4
+      value: true
+      vtype: boolean
+
+  - name: Persist iptables ipv6
+    debconf:
+      name: iptables-persistent
+      question: iptables-persistent/autosave_v6
+      value: true
+      vtype: boolean
+
+  - name: Apt Install iptables persistency
+    apt:
+      name: ['iptables-persistent']
+      state: present
+
   - name: Add user rundeck, home dir and shell
     user:
       name: rundeck
