@@ -1,0 +1,11 @@
+{
+    "devopsspiral/dos-chatops-errbot": {
+      "dos": {
+        "path": "dos.plug",
+        "repo": "https://github.com/devopsspiral/dos-chatops-errbot",
+        "documentation": "dos",
+        "name": "dos",
+        "python": "3"
+      } 
+    } 
+  } 
