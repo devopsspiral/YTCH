@@ -1,0 +1,14 @@
+---
+name: "build_jenkins"
+action_ref: "jenkins.build_job"
+description: "Trigger Jenkins job."
+formats:
+  - "build {{project}} with {{parameters}}"
+result:
+  format: "Jenkins job triggered"
+
+
+
+
+
+

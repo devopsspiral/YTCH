@@ -1,0 +1,17 @@
+---
+  name: jenkins_success
+  enabled: true
+  description: Webhook listening for job successes from Jenkins
+  trigger:
+    type: core.st2.webhook
+    parameters:
+      url: jenkins
+  criteria:
+    trigger.body.event:
+      pattern: success
+      type: eq
+  action:
+    ref: chatops.post_message
+    parameters:
+      message: "Jenkins job succeeded!"
+      channel: "#11_chatops_stackstorm"

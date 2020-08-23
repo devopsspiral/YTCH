@@ -1,0 +1,9 @@
+---
+name: "local_shell_cmd"
+action_ref: "core.local"
+description: "Execute a command on a remote host via SSH."
+formats:
+  - "run {{cmd}}"
+result:
+  format: "operation completed {~} {{ execution.result }}"
+
