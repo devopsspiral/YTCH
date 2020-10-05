@@ -1,0 +1,73 @@
+version: 2.1
+
+orbs:
+  python: circleci/python@0.3.2
+
+jobs:
+  build-and-test:
+    executor: python/default
+    environment:
+      PYTHONPATH=./src
+    steps:
+      - checkout
+      - python/load-cache
+      - python/install-deps
+      - python/save-cache
+      - python/test
+  lint-and-coverage:
+    executor: python/default
+    environment:
+      PYTHONPATH=./src
+    steps:
+      - checkout
+      - python/load-cache
+      - python/install-deps
+      - python/save-cache
+      - run:
+          name: Linter
+          command: |
+            flake8 src/
+            flake8 test/
+      - run:
+          name: Coverage
+          command: |
+            coverage run
+            coverage report
+  publish-to-pypi:
+    executor: python/default
+    environment:
+      PYTHONPATH=./src
+    steps:
+      - checkout
+      - run:
+          name: Verify setup.py and changelog
+          command: |
+            SEMVER="${CIRCLE_TAG:1}"
+            grep version='"'$SEMVER'"' setup.py
+            grep "## \[$SEMVER\]" CHANGELOG.md
+      - run:
+          name: Publish to PYPI
+          command: |
+            pip install twine
+            python3 setup.py sdist bdist_wheel
+            python3 -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*  
+workflows:
+  main:
+    jobs:
+      - build-and-test:
+          filters:
+            tags:
+              only: /.*/
+      - lint-and-coverage:
+          filters:
+            tags:
+              only: /.*/
+      - publish-to-pypi:
+          requires:
+            - build-and-test
+            - lint-and-coverage
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
