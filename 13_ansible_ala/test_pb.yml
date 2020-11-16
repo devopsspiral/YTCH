@@ -1,0 +1,19 @@
+- name: Main playbook
+  hosts: localhost
+  gather_facts: no  
+  tasks:
+    - name: Regular execution
+      pause:
+        seconds: 5
+
+- name: Final playbook
+  hosts: localhost
+  gather_facts: no  
+  tasks:
+    - name: Generate random number
+      set_fact:
+        failure_number: "{{ 10 | random(start=1) }}"
+    - name: Random failure
+      debug:
+        msg: "Testing for failure ({{ failure_number }})!"
+      failed_when: failure_number | int > 5
