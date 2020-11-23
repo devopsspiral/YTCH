@@ -1,0 +1,23 @@
+Ansible_CL 
+| project time_t, id_g, playbook_s, host_s, play_s, task_s, result_msg_s
+| sort by time_t desc
+
+Ansible_CL 
+| where isnotempty(result_msg_s) and playbook_s == "test_pb"
+| summarize count() by task_s
+
+Ansible_CL
+| where play_s == "START" and playbook_s == "test_pb"
+| project ExecutionId = id_g, StartTime=time_t
+| join kind=inner (Ansible_CL
+		| where play_s == "SUCCESS"
+		| project ExecutionId = id_g, StopTime=time_t)
+	on ExecutionId
+| project StartTime, StopTime, Duration = StopTime - StartTime
+
+Ansible_CL
+| where play_s == "SUCCESS" or play_s == "FAILED" or play_s == "UNREACHABLE"
+| where playbook_s == "test_pb"
+| distinct id_g, play_s
+| summarize count() by play_s
+| render piechart

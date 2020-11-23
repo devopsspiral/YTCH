@@ -16,7 +16,7 @@ DOCUMENTATION = '''
       - This is plugin that allows sending ansible events to centralised logging systems using fluentd
 '''
 
-fluentd_url = "http://localhost/ansible.log"
+fluentd_url = "http://localhost:9880/ansible.log"
 
 
 class CallbackModule(CallbackBase):
